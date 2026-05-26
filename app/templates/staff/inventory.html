@@ -1,0 +1,153 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Inventory & Stock Logging{% endblock %}
+
+{% block content %}
+<section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Headers -->
+        <div class="flex justify-between items-baseline border-b border-gray-100 pb-6 mb-8">
+            <div>
+                <span class="text-xs uppercase tracking-widest text-softpink font-medium">Store Operations</span>
+                <h1 class="font-serif text-3xl font-light text-matte mt-1">Inventory Logs</h1>
+            </div>
+            
+            <div class="flex space-x-4 text-xs uppercase tracking-widest font-semibold">
+                <a href="{{ url_for('staff.products') }}" class="hover:text-softpink transition">Products CRUD</a>
+                <span class="text-gray-300">|</span>
+                <span class="text-softpink border-b border-softpink pb-1">Inventory Logs</span>
+                <span class="text-gray-300">|</span>
+                <a href="{{ url_for('staff.orders') }}" class="hover:text-softpink transition">Purchase Orders</a>
+                <span class="text-gray-300">|</span>
+                <a href="{{ url_for('staff.rentals') }}" class="hover:text-softpink transition">Rentals board</a>
+            </div>
+        </div>
+        
+        <!-- Stock Overview Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="border border-gray-100 p-6 rounded-sm bg-white shadow-sm flex items-center space-x-4">
+                <div class="p-3.5 bg-gray-50 text-matte rounded-full text-lg"><i class="fa-solid fa-boxes-stacked"></i></div>
+                <div>
+                    <h3 class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Total Stock Items</h3>
+                    <p class="text-2xl font-bold text-matte">{{ products|sum(attribute='stock') }} units</p>
+                </div>
+            </div>
+            
+            <div class="border border-gray-100 p-6 rounded-sm bg-white shadow-sm flex items-center space-x-4">
+                <div class="p-3.5 {% if low_stock_count > 0 %}bg-yellow-50 text-yellow-600{% else %}bg-gray-50 text-gray-400{% endif %} rounded-full text-lg"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div>
+                    <h3 class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Low Stock Alerts</h3>
+                    <p class="text-2xl font-bold {% if low_stock_count > 0 %}text-yellow-600{% else %}text-matte{% endif %}">{{ low_stock_count }} items</p>
+                </div>
+            </div>
+            
+            <div class="border border-gray-100 p-6 rounded-sm bg-white shadow-sm flex items-center space-x-4">
+                <div class="p-3.5 {% if out_of_stock_count > 0 %}bg-red-50 text-red-600{% else %}bg-gray-50 text-gray-400{% endif %} rounded-full text-lg"><i class="fa-solid fa-ban"></i></div>
+                <div>
+                    <h3 class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Out of Stock</h3>
+                    <p class="text-2xl font-bold {% if out_of_stock_count > 0 %}text-red-600{% else %}text-matte{% endif %}">{{ out_of_stock_count }} items</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Two Column Layout: Quick Stock Adjust & Logs table -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <!-- Left Side: Quick Stock Adjust -->
+            <div class="lg:col-span-4 bg-blush/20 border border-softpink/10 p-6 md:p-8 rounded-sm space-y-6">
+                <h3 class="text-xs uppercase tracking-widest font-bold text-matte border-b border-gray-100 pb-3">Adjust Stock Levels</h3>
+                
+                <form action="{{ url_for('staff.adjust_stock') }}" method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <!-- Select Product -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Select Product</label>
+                        <select name="product_id" required class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white text-gray-700">
+                            {% for prod in products %}
+                            <option value="{{ prod.id }}">{{ prod.name }} ({{ prod.size }}) — Stock: {{ prod.stock }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Adjust Amount -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Adjustment Qty</label>
+                            <input type="number" name="quantity" required placeholder="e.g. 5 or -2" class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Action Type</label>
+                            <select name="action" class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white text-gray-700">
+                                <option value="Restocked">Restocked (+)</option>
+                                <option value="Damaged">Damaged (-)</option>
+                                <option value="Lost">Lost (-)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Optional Notes</label>
+                        <input type="text" name="notes" placeholder="e.g. Winter batch delivery, broken hanger" class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white">
+                    </div>
+                    
+                    <button type="submit" class="btn-luxury w-full py-3.5 text-xs font-semibold rounded-sm uppercase tracking-widest mt-2">
+                        Submit Adjustment
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Right Side: Chronological Logs -->
+            <div class="lg:col-span-8 bg-white border border-gray-100 rounded-sm shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-gray-100">
+                    <h3 class="text-xs uppercase tracking-widest font-bold text-matte">Chronological Logs</h3>
+                </div>
+                
+                <div class="max-h-[500px] overflow-y-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100 text-[10px] uppercase tracking-widest text-gray-500 font-semibold sticky top-0">
+                                <th class="p-4">Timestamp</th>
+                                <th class="p-4">Product</th>
+                                <th class="p-4">Action</th>
+                                <th class="p-4">Change</th>
+                                <th class="p-4">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for log in logs %}
+                            <tr class="hover:bg-gray-50/50 transition-colors duration-150">
+                                <td class="p-4 text-gray-400 font-mono text-[10px]">{{ log.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td class="p-4 font-semibold text-matte">{{ log.product.name }} ({{ log.product.size }})</td>
+                                <td class="p-4">
+                                    {% if log.action in ['Created', 'Restocked', 'Returned'] %}
+                                    <span class="text-green-700 font-semibold uppercase tracking-wider text-[9px]">{{ log.action }}</span>
+                                    {% else %}
+                                    <span class="text-red-600 font-semibold uppercase tracking-wider text-[9px]">{{ log.action }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-4 font-bold font-mono">
+                                    {% if log.quantity > 0 %}
+                                    <span class="text-green-700">+{{ log.quantity }}</span>
+                                    {% elif log.quantity < 0 %}
+                                    <span class="text-red-600">{{ log.quantity }}</span>
+                                    {% else %}
+                                    <span class="text-gray-400">0</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-4 text-gray-500 font-light max-w-xs truncate">{{ log.notes or '-' }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="p-8 text-center text-gray-400">No inventory logs available.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

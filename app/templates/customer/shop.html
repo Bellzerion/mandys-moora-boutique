@@ -1,0 +1,143 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Shop Collection{% endblock %}
+
+{% block content %}
+<section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header title -->
+        <div class="text-center py-8 border-b border-gray-100">
+            <span class="text-xs uppercase tracking-widest text-softpink font-medium">Boutique Closet</span>
+            <h1 class="font-serif text-4xl font-light tracking-wide mt-1">Our Collection</h1>
+            <p class="text-xs text-gray-400 mt-2 font-light">EXPLORE MODERN LUXURY PIECES AVAILABLE FOR PURCHASE AND RENTAL</p>
+        </div>
+        
+        <!-- Filter Controls bar -->
+        <div class="mt-8 flex flex-col lg:flex-row gap-6 items-center justify-between py-4 border-b border-gray-100">
+            <!-- Search field -->
+            <form action="{{ url_for('main.shop') }}" method="GET" class="w-full lg:w-72 relative">
+                {% if current_category %}<input type="hidden" name="category" value="{{ current_category }}">{% endif %}
+                {% if current_size %}<input type="hidden" name="size" value="{{ current_size }}">{% endif %}
+                {% if current_sort %}<input type="hidden" name="sort_by" value="{{ current_sort }}">{% endif %}
+                <input type="text" name="q" placeholder="Search collection..." value="{{ search_query }}" class="w-full border border-gray-200 text-xs px-4 py-2.5 uppercase tracking-wider rounded-sm focus:outline-none focus:border-matte font-light">
+                <button type="submit" class="absolute right-3 top-3 text-gray-400 hover:text-matte transition"><i class="fa-solid fa-magnifying-glass text-xs"></i></button>
+            </form>
+            
+            <!-- Category buttons / links -->
+            <div class="flex flex-wrap justify-center gap-2">
+                <a href="{{ url_for('main.shop', size=current_size, sort_by=current_sort, q=search_query) }}" class="text-[10px] uppercase tracking-widest px-4 py-2 border rounded-sm transition {% if not current_category %}bg-matte text-white border-matte{% else %}border-gray-200 text-gray-500 hover:border-matte hover:text-matte{% endif %}">
+                    All Categories
+                </a>
+                {% for cat in categories %}
+                <a href="{{ url_for('main.shop', category=cat, size=current_size, sort_by=current_sort, q=search_query) }}" class="text-[10px] uppercase tracking-widest px-4 py-2 border rounded-sm transition {% if current_category == cat %}bg-matte text-white border-matte{% else %}border-gray-200 text-gray-500 hover:border-matte hover:text-matte{% endif %}">
+                    {{ cat }}
+                </a>
+                {% endfor %}
+            </div>
+            
+            <!-- Dropdown controls -->
+            <div class="flex space-x-4 w-full lg:w-auto justify-between lg:justify-end">
+                <!-- Size drop-down -->
+                <select onchange="location = this.value;" class="border border-gray-200 text-xs px-3 py-2 uppercase tracking-wider rounded-sm focus:outline-none focus:border-matte text-gray-600 bg-white">
+                    <option value="{{ url_for('main.shop', category=current_category, sort_by=current_sort, q=search_query) }}">Filter Size</option>
+                    {% for sz in sizes %}
+                    <option value="{{ url_for('main.shop', category=current_category, size=sz, sort_by=current_sort, q=search_query) }}" {% if current_size == sz %}selected{% endif %}>
+                        Size: {{ sz }}
+                    </option>
+                    {% endfor %}
+                </select>
+                
+                <!-- Sort drop-down -->
+                <select onchange="location = this.value;" class="border border-gray-200 text-xs px-3 py-2 uppercase tracking-wider rounded-sm focus:outline-none focus:border-matte text-gray-600 bg-white">
+                    <option value="{{ url_for('main.shop', category=current_category, size=current_size, sort_by='newest', q=search_query) }}" {% if current_sort == 'newest' %}selected{% endif %}>Newest In</option>
+                    <option value="{{ url_for('main.shop', category=current_category, size=current_size, sort_by='price_asc', q=search_query) }}" {% if current_sort == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="{{ url_for('main.shop', category=current_category, size=current_size, sort_by='price_desc', q=search_query) }}" {% if current_sort == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Active filter tags -->
+        {% if current_category or current_size or search_query %}
+        <div class="flex items-center space-x-3 mt-6">
+            <span class="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Active filters:</span>
+            <div class="flex flex-wrap gap-2">
+                {% if current_category %}
+                <span class="inline-flex items-center bg-gray-50 border border-gray-200 text-[10px] uppercase tracking-widest px-3 py-1 rounded-full text-matte">
+                    Category: {{ current_category }}
+                    <a href="{{ url_for('main.shop', size=current_size, sort_by=current_sort, q=search_query) }}" class="ml-2 hover:text-red-500"><i class="fa-solid fa-xmark text-[9px]"></i></a>
+                </span>
+                {% endif %}
+                {% if current_size %}
+                <span class="inline-flex items-center bg-gray-50 border border-gray-200 text-[10px] uppercase tracking-widest px-3 py-1 rounded-full text-matte">
+                    Size: {{ current_size }}
+                    <a href="{{ url_for('main.shop', category=current_category, sort_by=current_sort, q=search_query) }}" class="ml-2 hover:text-red-500"><i class="fa-solid fa-xmark text-[9px]"></i></a>
+                </span>
+                {% endif %}
+                {% if search_query %}
+                <span class="inline-flex items-center bg-gray-50 border border-gray-200 text-[10px] uppercase tracking-widest px-3 py-1 rounded-full text-matte">
+                    Query: "{{ search_query }}"
+                    <a href="{{ url_for('main.shop', category=current_category, size=current_size, sort_by=current_sort) }}" class="ml-2 hover:text-red-500"><i class="fa-solid fa-xmark text-[9px]"></i></a>
+                </span>
+                {% endif %}
+                <a href="{{ url_for('main.shop') }}" class="text-[10px] text-red-500 hover:underline uppercase tracking-widest self-center ml-2">Clear all</a>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Product Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-10">
+            {% for product in products %}
+            <div class="group luxury-card relative flex flex-col bg-white border border-gray-50 rounded-sm p-3">
+                
+                <!-- Product image -->
+                <div class="aspect-[3/4] overflow-hidden bg-gray-50 hover-zoom rounded-sm relative">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-full h-full object-cover">
+                    <!-- Out of stock badge -->
+                    {% if product.stock == 0 %}
+                    <span class="absolute top-4 left-4 bg-matte text-white text-[8px] uppercase tracking-widest px-3 py-1 font-semibold">
+                        Out of stock
+                    </span>
+                    {% elif product.stock < 5 %}
+                    <span class="absolute top-4 left-4 bg-softpink text-matte text-[8px] uppercase tracking-widest px-3 py-1 font-semibold">
+                        Low Stock
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <!-- Details -->
+                <div class="pt-4 flex-grow flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between text-[10px] text-gray-400 uppercase tracking-widest mb-1">
+                            <span>{{ product.category }}</span>
+                            <span>Size: {{ product.size }}</span>
+                        </div>
+                        <h3 class="text-xs font-medium text-matte group-hover:text-softpink transition-colors duration-300">
+                            <a href="{{ url_for('main.product_details', product_id=product.id) }}">{{ product.name }}</a>
+                        </h3>
+                    </div>
+                    
+                    <div class="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
+                        <div>
+                            <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Own For</span>
+                            <span class="text-xs font-semibold text-matte">${{ "%.2f"|format(product.price) }}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Rent From</span>
+                            <span class="text-xs font-semibold text-softpink">${{ "%.2f"|format(product.rental_price) }} / day</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-span-4 text-center py-20 bg-gray-50 rounded-sm">
+                <i class="fa-solid fa-tags text-2xl text-gray-300 mb-3"></i>
+                <h3 class="text-xs uppercase tracking-widest text-gray-500 font-semibold">No items match your criteria</h3>
+                <p class="text-xs text-gray-400 mt-1 font-light">Try expanding your search query or removing filters.</p>
+                <a href="{{ url_for('main.shop') }}" class="btn-luxury inline-block px-6 py-2.5 mt-4 rounded-sm">Reset filters</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

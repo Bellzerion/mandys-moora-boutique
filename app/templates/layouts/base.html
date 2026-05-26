@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mandy's Moora{% endblock %} | Premium Fashion Boutique</title>
+    
+    <!-- Meta tags for SEO -->
+    <meta name="description" content="Mandy’s Moora is a premium luxury fashion boutique offering high-end apparel for sale and rental. Discover elegant collections.">
+    <meta name="author" content="Mandy Moora">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        matte: '#111111',
+                        softpink: '#F4B6C2',
+                        accentpink: '#E09AA6',
+                        blush: '#FAF0F2',
+                        charcoal: '#222222',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="flex flex-col min-h-screen bg-white text-matte font-sans">
+
+    <!-- Header Navbar -->
+    {% include 'components/navbar.html' %}
+
+    <!-- Alert Banner / Flashes -->
+    {% include 'components/alerts.html' %}
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    {% include 'components/footer.html' %}
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

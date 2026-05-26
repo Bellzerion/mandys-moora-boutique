@@ -1,0 +1,58 @@
+<footer class="bg-matte text-white/90 border-t border-charcoal py-16 mt-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+            <!-- Brand Section -->
+            <div class="space-y-4">
+                <a href="{{ url_for('main.home') }}" class="font-serif text-xl font-bold tracking-widest uppercase text-white">
+                    Mandy’s Moora
+                </a>
+                <p class="text-xs text-white/50 leading-relaxed font-light">
+                    A curated wardrobe experience offering high-end luxury fashion purchases and custom rentals designed to elevate every occasion.
+                </p>
+                <div class="flex space-x-4 pt-2">
+                    <a href="#" class="text-white/50 hover:text-softpink transition-colors"><i class="fa-brands fa-instagram text-base"></i></a>
+                    <a href="#" class="text-white/50 hover:text-softpink transition-colors"><i class="fa-brands fa-pinterest-p text-base"></i></a>
+                    <a href="#" class="text-white/50 hover:text-softpink transition-colors"><i class="fa-brands fa-facebook-f text-base"></i></a>
+                    <a href="#" class="text-white/50 hover:text-softpink transition-colors"><i class="fa-brands fa-tiktok text-base"></i></a>
+                </div>
+            </div>
+            
+            <!-- Collections Section -->
+            <div>
+                <h4 class="text-xs uppercase tracking-widest text-softpink font-semibold mb-6">Collections</h4>
+                <ul class="space-y-3 text-xs text-white/60 font-light">
+                    <li><a href="{{ url_for('main.shop', category='Dresses') }}" class="hover:text-white transition">Formal Dresses</a></li>
+                    <li><a href="{{ url_for('main.shop', category='Outerwear') }}" class="hover:text-white transition">Luxury Outerwear</a></li>
+                    <li><a href="{{ url_for('main.shop', category='Jumpsuits') }}" class="hover:text-white transition">Designer Jumpsuits</a></li>
+                    <li><a href="{{ url_for('main.shop', category='Accessories') }}" class="hover:text-white transition">Statement Jewelry</a></li>
+                </ul>
+            </div>
+            
+            <!-- Services Section -->
+            <div>
+                <h4 class="text-xs uppercase tracking-widest text-softpink font-semibold mb-6">Services</h4>
+                <ul class="space-y-3 text-xs text-white/60 font-light">
+                    <li><a href="#" class="hover:text-white transition">Boutique Purchase</a></li>
+                    <li><a href="#" class="hover:text-white transition">Dress Rental Program</a></li>
+                    <li><a href="#" class="hover:text-white transition">Style Consultations</a></li>
+                    <li><a href="#" class="hover:text-white transition">Return Policy</a></li>
+                </ul>
+            </div>
+            
+            <!-- Newsletter Section -->
+            <div class="space-y-4">
+                <h4 class="text-xs uppercase tracking-widest text-softpink font-semibold mb-6">Newsletter</h4>
+                <p class="text-xs text-white/50 font-light">Subscribe to get collection releases and styling advice.</p>
+                <form class="flex border-b border-white/20 pb-1" onsubmit="event.preventDefault(); alert('Thank you for subscribing!');">
+                    <input type="email" placeholder="ENTER YOUR EMAIL" class="bg-transparent border-none text-xs text-white w-full focus:outline-none placeholder-white/30 uppercase tracking-wider font-light">
+                    <button type="submit" class="text-white/70 hover:text-softpink transition-colors"><i class="fa-solid fa-arrow-right"></i></button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="border-t border-charcoal mt-16 pt-8 flex flex-col sm:flex-row justify-between items-center text-[10px] text-white/40 tracking-wider uppercase font-light">
+            <p>&copy; 2026 Mandy's Moora Boutique. All rights reserved.</p>
+            <p class="mt-2 sm:mt-0">Designed for Elegance</p>
+        </div>
+    </div>
+</footer>

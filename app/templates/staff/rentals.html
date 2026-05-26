@@ -1,0 +1,133 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Rental Management Dashboard{% endblock %}
+
+{% block content %}
+<section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Tab navigation -->
+        <div class="flex justify-between items-baseline border-b border-gray-100 pb-6 mb-8">
+            <div>
+                <span class="text-xs uppercase tracking-widest text-softpink font-medium">Store Operations</span>
+                <h1 class="font-serif text-3xl font-light text-matte mt-1">Rental Management</h1>
+            </div>
+            
+            <div class="flex space-x-4 text-xs uppercase tracking-widest font-semibold">
+                <a href="{{ url_for('staff.products') }}" class="hover:text-softpink transition">Products CRUD</a>
+                <span class="text-gray-300">|</span>
+                <a href="{{ url_for('staff.inventory') }}" class="hover:text-softpink transition">Inventory Logs</a>
+                <span class="text-gray-300">|</span>
+                <a href="{{ url_for('staff.orders') }}" class="hover:text-softpink transition">Purchase Orders</a>
+                <span class="text-gray-300">|</span>
+                <span class="text-softpink border-b border-softpink pb-1">Rentals board</span>
+            </div>
+        </div>
+        
+        <!-- Rentals list -->
+        <div class="bg-white border border-gray-100 rounded-sm shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+                <h3 class="text-xs uppercase tracking-widest font-bold text-matte">All Active & Historic Rentals</h3>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-100 text-[10px] uppercase tracking-widest text-gray-500 font-semibold">
+                            <th class="p-4">Rental ID</th>
+                            <th class="p-4">Customer</th>
+                            <th class="p-4">Product Details</th>
+                            <th class="p-4">Rent Date</th>
+                            <th class="p-4">Expected Return</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4">Base Fee / Late Penalty</th>
+                            <th class="p-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for rent in rentals %}
+                        <tr class="hover:bg-gray-50/50 transition-colors duration-150">
+                            <!-- ID -->
+                            <td class="p-4 font-bold text-matte font-mono">#{{ rent.id }}</td>
+                            
+                            <!-- Customer -->
+                            <td class="p-4">
+                                <div class="font-medium text-matte">{{ rent.customer.fullname }}</div>
+                                <div class="text-[10px] text-gray-400 font-mono">{{ rent.customer.email }}</div>
+                            </td>
+                            
+                            <!-- Product -->
+                            <td class="p-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-8 h-10 bg-gray-100 rounded-sm overflow-hidden flex-shrink-0">
+                                        <img src="{{ rent.product.image_url }}" alt="" class="w-full h-full object-cover">
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-matte">{{ rent.product.name }}</div>
+                                        <div class="text-[10px] text-gray-400 uppercase tracking-widest">Cat: {{ rent.product.category }} • Size {{ rent.product.size }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            
+                            <!-- Dates -->
+                            <td class="p-4 text-gray-600 font-mono">{{ rent.rent_date.strftime('%Y-%m-%d') }}</td>
+                            <td class="p-4 font-mono {% if rent.rental_status == 'Late' %}text-red-600 font-bold{% else %}text-gray-600{% endif %}">
+                                {{ rent.expected_return_date.strftime('%Y-%m-%d') }}
+                            </td>
+                            
+                            <!-- Status -->
+                            <td class="p-4">
+                                {% if rent.rental_status == 'Pending' %}
+                                <span class="bg-gray-100 text-gray-600 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-sm">Pending</span>
+                                {% elif rent.rental_status == 'Active' %}
+                                <span class="bg-blue-50 text-blue-800 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-sm">Active</span>
+                                {% elif rent.rental_status == 'Returned' %}
+                                <span class="bg-green-50 text-green-800 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-sm">Returned</span>
+                                {% else %}
+                                <span class="bg-red-50 text-red-800 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-sm animate-pulse">Late Return</span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Fees -->
+                            <td class="p-4">
+                                <div class="font-bold text-matte">${{ "%.2f"|format(rent.rental_fee) }}</div>
+                                {% if rent.late_fee > 0 %}
+                                <div class="text-[10px] text-red-600 font-bold font-mono">+${{ "%.2f"|format(rent.late_fee) }} late fee</div>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Actions -->
+                            <td class="p-4 text-right">
+                                {% if rent.rental_status == 'Pending' %}
+                                <form action="{{ url_for('staff.update_rental_status', rental_id=rent.id) }}" method="POST" class="inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="action" value="approve">
+                                    <button type="submit" class="btn-luxury px-3 py-1.5 text-[9px] rounded-sm uppercase tracking-wider font-semibold">
+                                        Mark picked up
+                                    </button>
+                                </form>
+                                {% elif rent.rental_status in ['Active', 'Late'] %}
+                                <form action="{{ url_for('staff.update_rental_status', rental_id=rent.id) }}" method="POST" class="inline" onsubmit="return confirm('Confirm return for Rental #{{ rent.id }}? This will recalculate any late fees and replenish stock.');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="action" value="return">
+                                    <button type="submit" class="btn-pink px-3 py-1.5 text-[9px] rounded-sm uppercase tracking-wider font-semibold">
+                                        Check In / Return
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="text-gray-400 text-[10px] italic">Completed</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="p-8 text-center text-gray-400">No rental records found in database.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

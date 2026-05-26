@@ -1,0 +1,70 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="border-b border-gray-100 pb-6 mb-10">
+            <h1 class="font-serif text-3xl font-light tracking-wide text-matte">My Profile</h1>
+            <p class="text-xs text-gray-400 mt-2 font-light">MANAGE YOUR ACCOUNT DETAILS AND PERSONAL PREFERENCES</p>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <!-- Left Side: Profile Form -->
+            <div class="lg:col-span-8 bg-white border border-gray-100 p-8 rounded-sm shadow-sm">
+                <h3 class="text-xs uppercase tracking-widest font-bold text-matte border-b border-gray-100 pb-3 mb-6">Account Settings</h3>
+                
+                <form method="POST" class="space-y-6">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Full Name</label>
+                            <input type="text" name="fullname" value="{{ current_user.fullname }}" required class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Email Address</label>
+                            <input type="email" name="email" value="{{ current_user.email }}" required class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white">
+                        </div>
+                    </div>
+                    
+                    <div class="border-t border-gray-100 pt-6 space-y-4">
+                        <h4 class="text-[10px] uppercase tracking-widest font-bold text-matte">Update Password (Optional)</h4>
+                        <div class="space-y-2">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">New Password</label>
+                            <input type="password" name="password" placeholder="Leave blank to keep current password" class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-pink px-8 py-3.5 text-xs font-semibold rounded-sm">
+                        Save Changes
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Right Side: Info card -->
+            <div class="lg:col-span-4 bg-blush/20 p-8 border border-softpink/10 rounded-sm space-y-6">
+                <h3 class="text-xs uppercase tracking-widest font-bold text-matte border-b border-gray-100 pb-3">Membership</h3>
+                
+                <div class="space-y-4 text-xs font-light text-gray-600">
+                    <div class="flex justify-between">
+                        <span>Role Status</span>
+                        <span class="font-semibold text-matte uppercase tracking-widest text-[10px] bg-matte text-white px-2 py-0.5 rounded-sm">{{ current_user.role }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Member Since</span>
+                        <span class="font-semibold text-matte">{{ current_user.created_at.strftime('%B %Y') }}</span>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-100 pt-4 text-[10px] text-gray-400 font-light leading-relaxed">
+                    Need to modify your role or delete your account? Please contact boutique support at <a href="mailto:support@moora.com" class="underline text-matte">support@moora.com</a>.
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</section>
+{% endblock %}

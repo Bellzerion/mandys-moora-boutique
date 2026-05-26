@@ -1,0 +1,122 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Shopping Cart{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="border-b border-gray-100 pb-6 mb-10">
+            <h1 class="font-serif text-3xl font-light tracking-wide text-matte">Your Shopping Bag</h1>
+            <p class="text-xs text-gray-400 mt-2 font-light">REVIEW YOUR ITEMS FOR PURCHASE AND RENTAL SELECTION</p>
+        </div>
+        
+        {% if cart_items %}
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <!-- Left Side: List of Items -->
+            <div class="lg:col-span-8 space-y-6">
+                {% for item in cart_items %}
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border border-gray-100 rounded-sm bg-white space-y-4 sm:space-y-0 relative">
+                    <!-- Product Details -->
+                    <div class="flex items-center space-x-6">
+                        <div class="w-20 h-24 bg-gray-50 overflow-hidden rounded-sm flex-shrink-0 border border-gray-50">
+                            <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                {% if item.type == 'buy' %}
+                                <span class="bg-matte text-white text-[8px] uppercase tracking-widest px-2 py-0.5 font-bold rounded-sm">Buy</span>
+                                {% else %}
+                                <span class="bg-softpink text-matte text-[8px] uppercase tracking-widest px-2 py-0.5 font-bold rounded-sm">Rent</span>
+                                {% endif %}
+                                <span class="text-[10px] text-gray-400 uppercase tracking-wider">{{ item.product.category }}</span>
+                            </div>
+                            <h3 class="text-xs font-semibold text-matte">{{ item.product.name }}</h3>
+                            <div class="text-[10px] text-gray-500 uppercase tracking-widest space-y-0.5">
+                                <p>Size: <span class="font-bold text-matte">{{ item.product.size }}</span></p>
+                                {% if item.type == 'rent' %}
+                                <p>Duration: <span class="font-bold text-softpink">{{ item.duration }} Days</span></p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Qty & Price -->
+                    <div class="flex sm:flex-col items-baseline sm:items-end justify-between w-full sm:w-auto pt-4 sm:pt-0 border-t sm:border-t-0 border-gray-100">
+                        <div class="text-left sm:text-right space-y-1">
+                            <span class="text-[10px] text-gray-400 uppercase tracking-widest block">Subtotal (Qty x{{ item.quantity }})</span>
+                            <span class="text-xs font-bold text-matte">${{ "%.2f"|format(item.subtotal) }}</span>
+                            {% if item.type == 'rent' %}
+                            <span class="text-[9px] text-gray-400 block">${{ "%.2f"|format(item.price) }} / rent period</span>
+                            {% else %}
+                            <span class="text-[9px] text-gray-400 block">${{ "%.2f"|format(item.product.price) }} each</span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Remove button -->
+                        <form action="{{ url_for('customer.remove_from_cart', key=item.key) }}" method="POST" class="mt-4 sm:mt-2">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="text-[10px] text-red-500 hover:text-red-700 uppercase tracking-widest font-semibold flex items-center">
+                                <i class="fa-regular fa-trash-can mr-1.5 text-xs"></i> Remove
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <div class="flex justify-between items-center pt-4">
+                    <a href="{{ url_for('main.shop') }}" class="text-xs uppercase tracking-widest font-semibold hover:text-softpink transition flex items-center">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Continue Shopping
+                    </a>
+                    
+                    <form action="{{ url_for('customer.clear_cart') }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="text-xs uppercase tracking-widest text-gray-400 hover:text-matte transition font-semibold">
+                            Clear Bag
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Right Side: Summary Box -->
+            <div class="lg:col-span-4 bg-blush/20 border border-softpink/10 p-8 rounded-sm space-y-6">
+                <h3 class="text-xs uppercase tracking-widest font-bold text-matte border-b border-gray-100 pb-3">Bag Summary</h3>
+                
+                <div class="space-y-4 text-xs font-light text-gray-600">
+                    <div class="flex justify-between">
+                        <span>Items for Purchase</span>
+                        <span class="font-semibold text-matte">${{ "%.2f"|format(total_buy) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Items for Rent</span>
+                        <span class="font-semibold text-matte">${{ "%.2f"|format(total_rent) }}</span>
+                    </div>
+                    <div class="border-t border-gray-200 pt-4 flex justify-between items-baseline">
+                        <span class="text-xs uppercase tracking-widest font-bold text-matte">Total Amount</span>
+                        <span class="font-serif text-2xl font-semibold text-softpink">${{ "%.2f"|format(grand_total) }}</span>
+                    </div>
+                </div>
+                
+                <div class="pt-4">
+                    <a href="{{ url_for('customer.checkout') }}" class="btn-luxury w-full py-4 text-center block text-xs font-semibold rounded-sm">
+                        Proceed to Checkout
+                    </a>
+                </div>
+                
+                <div class="text-[10px] text-gray-400 font-light text-center leading-relaxed">
+                    Taxes calculated at checkout. Delivery includes standard 3-day transit with carbon-neutral shipping methods.
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-24 bg-gray-50 rounded-sm">
+            <i class="fa-solid fa-bag-shopping text-3xl text-gray-300 mb-4 block"></i>
+            <h2 class="text-xs uppercase tracking-widest text-gray-500 font-bold">Your shopping bag is empty</h2>
+            <p class="text-xs text-gray-400 mt-2 font-light max-w-sm mx-auto leading-relaxed">Looks like you haven't added any luxury pieces to your cart. Explore our new dresses, Outerwear and Tops collections.</p>
+            <a href="{{ url_for('main.shop') }}" class="btn-luxury inline-block px-8 py-3.5 mt-6 rounded-sm">Explore Collection</a>
+        </div>
+        {% endif %}
+        
+    </div>
+</section>
+{% endblock %}

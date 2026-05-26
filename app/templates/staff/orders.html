@@ -1,0 +1,119 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Order Processing Dashboard{% endblock %}
+
+{% block content %}
+<section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Tab navigation -->
+        <div class="flex justify-between items-baseline border-b border-gray-100 pb-6 mb-8">
+            <div>
+                <span class="text-xs uppercase tracking-widest text-softpink font-medium">Store Operations</span>
+                <h1 class="font-serif text-3xl font-light text-matte mt-1">Purchase Orders Queue</h1>
+            </div>
+            
+            <div class="flex space-x-4 text-xs uppercase tracking-widest font-semibold">
+                <a href="{{ url_for('staff.products') }}" class="hover:text-softpink transition">Products CRUD</a>
+                <span class="text-gray-300">|</span>
+                <a href="{{ url_for('staff.inventory') }}" class="hover:text-softpink transition">Inventory Logs</a>
+                <span class="text-gray-300">|</span>
+                <span class="text-softpink border-b border-softpink pb-1">Purchase Orders</span>
+                <span class="text-gray-300">|</span>
+                <a href="{{ url_for('staff.rentals') }}" class="hover:text-softpink transition">Rentals board</a>
+            </div>
+        </div>
+        
+        <!-- Orders list -->
+        <div class="bg-white border border-gray-100 rounded-sm shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-gray-100">
+                <h3 class="text-xs uppercase tracking-widest font-bold text-matte">Fulfillment Queue</h3>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-100 text-[10px] uppercase tracking-widest text-gray-500 font-semibold">
+                            <th class="p-4">Order ID</th>
+                            <th class="p-4">Customer Details</th>
+                            <th class="p-4">Items Summary</th>
+                            <th class="p-4">Order Date</th>
+                            <th class="p-4">Payment</th>
+                            <th class="p-4">Fulfillment Status</th>
+                            <th class="p-4 text-right">Fulfillment Update</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for order in orders %}
+                        <tr class="hover:bg-gray-50/50 transition-colors duration-150">
+                            <!-- Order ID -->
+                            <td class="p-4 font-bold text-matte font-mono">#{{ order.id }}</td>
+                            
+                            <!-- Customer Details -->
+                            <td class="p-4">
+                                <div class="font-medium text-matte">{{ order.customer.fullname }}</div>
+                                <div class="text-[10px] text-gray-400 font-mono">{{ order.customer.email }}</div>
+                            </td>
+                            
+                            <!-- Items Summary -->
+                            <td class="p-4">
+                                <details class="cursor-pointer text-gray-700 outline-none">
+                                    <summary class="font-semibold text-softpink hover:underline">View {{ order.items|length }} Items</summary>
+                                    <div class="mt-2 space-y-1 bg-gray-50 p-3 rounded-sm border border-gray-100 font-light">
+                                        {% for item in order.items %}
+                                        <p>{{ item.product.name }} ({{ item.product.size }}) x{{ item.quantity }} — ${{ "%.2f"|format(item.subtotal) }}</p>
+                                        {% endfor %}
+                                    </div>
+                                </details>
+                            </td>
+                            
+                            <!-- Date -->
+                            <td class="p-4 text-gray-600 font-mono">{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            
+                            <!-- Payment / Totals -->
+                            <td class="p-4 text-gray-600">
+                                <div class="font-bold text-matte">${{ "%.2f"|format(order.total_amount) }}</div>
+                                <div class="text-[9px] uppercase tracking-wider text-gray-400">{{ order.payment_method }}</div>
+                            </td>
+                            
+                            <!-- Status -->
+                            <td class="p-4">
+                                {% if order.order_status == 'Pending' %}
+                                <span class="bg-gray-100 text-gray-600 text-[9px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-sm">Pending</span>
+                                {% elif order.order_status == 'Processing' %}
+                                <span class="bg-yellow-50 text-yellow-800 text-[9px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-sm">Processing</span>
+                                {% elif order.order_status == 'Shipped' %}
+                                <span class="bg-blue-50 text-blue-800 text-[9px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-sm">Shipped</span>
+                                {% elif order.order_status == 'Delivered' %}
+                                <span class="bg-green-50 text-green-800 text-[9px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-sm">Delivered</span>
+                                {% else %}
+                                <span class="bg-red-50 text-red-800 text-[9px] uppercase tracking-widest font-bold px-2.5 py-1 rounded-sm">{{ order.order_status }}</span>
+                                {% endif %}
+                            </td>
+                            
+                            <!-- Actions -->
+                            <td class="p-4 text-right">
+                                <form action="{{ url_for('staff.update_order_status', order_id=order.id) }}" method="POST" class="inline-flex items-center space-x-2">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <select name="status" onchange="this.form.submit()" class="border border-gray-200 text-[10px] px-2 py-1.5 uppercase tracking-wider rounded-sm focus:outline-none focus:border-matte bg-white text-gray-700">
+                                        <option value="Pending" {% if order.order_status == 'Pending' %}selected{% endif %}>Pending</option>
+                                        <option value="Processing" {% if order.order_status == 'Processing' %}selected{% endif %}>Processing</option>
+                                        <option value="Shipped" {% if order.order_status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                                        <option value="Delivered" {% if order.order_status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                                        <option value="Cancelled" {% if order.order_status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="p-8 text-center text-gray-400">No purchase orders found in database.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

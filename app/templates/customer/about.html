@@ -1,0 +1,39 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Our Story{% endblock %}
+
+{% block content %}
+<section class="py-20 bg-white">
+    <div class="max-w-4xl mx-auto px-6 space-y-16">
+        <div class="text-center space-y-4">
+            <span class="text-xs uppercase tracking-widest text-softpink font-semibold">Our Story</span>
+            <h1 class="font-serif text-5xl font-light tracking-wide text-matte">Designed for the Modern Woman</h1>
+            <div class="w-12 h-0.5 bg-softpink mx-auto mt-6"></div>
+        </div>
+        
+        <!-- Editorial Image -->
+        <div class="aspect-[16/9] bg-gray-50 overflow-hidden rounded-sm border border-gray-50 shadow-sm">
+            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop" class="w-full h-full object-cover" alt="Boutique Atmosphere">
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 text-xs text-gray-500 font-light leading-relaxed">
+            <div class="space-y-6">
+                <h3 class="text-xs uppercase tracking-widest font-semibold text-matte">The Heritage</h3>
+                <p>Founded in 2026, Mandy's Moora began as a response to the fleeting cycle of fashion. We believed wardrobe choices should be sustainable without compromising on the prestige and feel of high-end design.</p>
+                <p>We source only premium materials—100% organic silks, Mongolian cashmere blends, and French-milled lace—ensuring every garment in our collection is a masterpiece of craftsmanship.</p>
+            </div>
+            <div class="space-y-6">
+                <h3 class="text-xs uppercase tracking-widest font-semibold text-matte">The Vision</h3>
+                <p>Our rental service offers a curated wardrobe that flows with your life. Rent for high-profile events, work meetings, or simple weekend escapes, then return them without the clutter of ownership.</p>
+                <p>We invite you to experience a circular fashion economy that values beauty, sustainability, and flexibility. Own your style, rent the dress.</p>
+            </div>
+        </div>
+        
+        <!-- Quote card -->
+        <div class="bg-blush/30 p-12 text-center rounded-sm font-serif italic text-lg md:text-xl text-matte leading-relaxed border border-softpink/10">
+            "We do not design clothes. We design confidence. Mandy's Moora is an extension of your persona, crafted to make you look unforgettable, responsibly."
+            <span class="block font-sans not-italic text-[10px] uppercase tracking-widest mt-6 text-gray-400 font-bold">— MANDY MOORA, FOUNDER</span>
+        </div>
+    </div>
+</section>
+{% endblock %}

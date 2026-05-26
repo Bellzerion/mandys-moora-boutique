@@ -1,0 +1,97 @@
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
+
+/* Webkit Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #111111;
+}
+::-webkit-scrollbar-thumb {
+    background: #F4B6C2;
+    border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #E09AA6;
+}
+
+body {
+    background-color: #FFFFFF;
+    color: #111111;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+}
+
+/* Hover effects */
+.hover-zoom img {
+    transition: transform 1.2s cubic-bezier(0.15, 0.85, 0.35, 1);
+}
+.hover-zoom:hover img {
+    transform: scale(1.06);
+}
+
+.fade-in {
+    animation: fadeIn 1s cubic-bezier(0.15, 0.85, 0.35, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom premium design classes */
+.btn-luxury {
+    background-color: #111111;
+    color: #FFFFFF;
+    border: 1px solid #111111;
+    transition: all 0.4s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.btn-luxury:hover {
+    background-color: #FFFFFF;
+    color: #111111;
+}
+
+.btn-luxury-outline {
+    background-color: transparent;
+    color: #111111;
+    border: 1px solid #111111;
+    transition: all 0.4s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.btn-luxury-outline:hover {
+    background-color: #111111;
+    color: #FFFFFF;
+}
+
+.btn-pink {
+    background-color: #F4B6C2;
+    color: #111111;
+    border: 1px solid #F4B6C2;
+    transition: all 0.4s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+.btn-pink:hover {
+    background-color: #111111;
+    color: #FFFFFF;
+    border-color: #111111;
+}
+
+.luxury-card {
+    transition: all 0.5s cubic-bezier(0.15, 0.85, 0.35, 1);
+}
+.luxury-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+}

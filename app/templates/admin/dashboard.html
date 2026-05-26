@@ -1,0 +1,250 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Owner Dashboard & Analytics{% endblock %}
+
+{% block content %}
+<section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-baseline border-b border-gray-100 pb-6 mb-8">
+            <div>
+                <span class="text-xs uppercase tracking-widest text-softpink font-medium">Boutique Owner Control</span>
+                <h1 class="font-serif text-3xl font-light text-matte mt-1">Analytics Dashboard</h1>
+            </div>
+            
+            <div class="flex space-x-4 text-xs uppercase tracking-widest font-semibold">
+                <span class="text-softpink border-b border-softpink pb-1">Analytics Overview</span>
+                <span class="text-gray-300">|</span>
+                <a href="{{ url_for('admin.staff') }}" class="hover:text-softpink transition">Staff Management</a>
+            </div>
+        </div>
+        
+        <!-- Key Metrics Row -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <div class="border border-gray-100 p-6 rounded-sm bg-matte text-white shadow-sm flex items-center space-x-4">
+                <div class="p-3 bg-charcoal text-softpink rounded-full text-lg"><i class="fa-solid fa-sack-dollar"></i></div>
+                <div>
+                    <h3 class="text-[9px] uppercase tracking-widest text-white/50 font-semibold">Gross Revenue</h3>
+                    <p class="text-xl font-bold text-softpink font-mono">${{ "%.2f"|format(metrics.total_revenue) }}</p>
+                </div>
+            </div>
+            
+            <div class="border border-gray-100 p-6 rounded-sm bg-white shadow-sm flex items-center space-x-4">
+                <div class="p-3 bg-gray-50 text-matte rounded-full text-lg"><i class="fa-solid fa-credit-card"></i></div>
+                <div>
+                    <h3 class="text-[9px] uppercase tracking-widest text-gray-400 font-semibold">Purchase Sales</h3>
+                    <p class="text-xl font-bold text-matte font-mono">${{ "%.2f"|format(metrics.total_sales) }}</p>
+                </div>
+            </div>
+            
+            <div class="border border-gray-100 p-6 rounded-sm bg-white shadow-sm flex items-center space-x-4">
+                <div class="p-3 bg-gray-50 text-softpink rounded-full text-lg"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div>
+                    <h3 class="text-[9px] uppercase tracking-widest text-gray-400 font-semibold">Rental Revenue</h3>
+                    <p class="text-xl font-bold text-matte font-mono">${{ "%.2f"|format(metrics.total_rent) }}</p>
+                </div>
+            </div>
+            
+            <div class="border border-gray-100 p-6 rounded-sm bg-white shadow-sm flex items-center space-x-4">
+                <div class="p-3 bg-gray-50 text-blue-700 rounded-full text-lg"><i class="fa-solid fa-user-tag"></i></div>
+                <div>
+                    <h3 class="text-[9px] uppercase tracking-widest text-gray-400 font-semibold">Active Rentals</h3>
+                    <p class="text-xl font-bold text-matte font-mono">{{ metrics.active_rentals }} items</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Layout Row 1 -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
+            <!-- Line Chart: Monthly Revenue -->
+            <div class="lg:col-span-8 border border-gray-100 rounded-sm bg-white p-6 shadow-sm">
+                <h3 class="text-xs uppercase tracking-widest font-bold text-matte mb-6 border-b border-gray-50 pb-3">Monthly Revenue (Sales vs Rentals)</h3>
+                <div class="h-80 relative">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Side Card: Product Performance Lists -->
+            <div class="lg:col-span-4 border border-gray-100 rounded-sm bg-white p-6 shadow-sm space-y-6">
+                <h3 class="text-xs uppercase tracking-widest font-bold text-matte border-b border-gray-50 pb-3">Best Performing Products</h3>
+                
+                <!-- Best Sellers -->
+                <div class="space-y-3">
+                    <h4 class="text-[10px] uppercase tracking-widest text-softpink font-bold"><i class="fa-solid fa-fire mr-1.5"></i> Best Sellers (Purchase Qty)</h4>
+                    <div class="divide-y divide-gray-50 text-xs">
+                        {% for item in metrics.top_sold %}
+                        <div class="py-2 flex justify-between items-center font-light">
+                            <span class="text-gray-700 truncate max-w-xs">{{ item.name }}</span>
+                            <span class="font-bold font-mono bg-gray-100 px-2 py-0.5 rounded-sm">{{ item.qty }} sold</span>
+                        </div>
+                        {% else %}
+                        <p class="text-gray-400 italic text-[11px] py-2">No purchase records.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Most Rented -->
+                <div class="space-y-3 pt-4 border-t border-gray-100">
+                    <h4 class="text-[10px] uppercase tracking-widest text-blue-700 font-bold"><i class="fa-solid fa-rotate mr-1.5"></i> Most Rented (Rent Count)</h4>
+                    <div class="divide-y divide-gray-50 text-xs">
+                        {% for item in metrics.top_rented %}
+                        <div class="py-2 flex justify-between items-center font-light">
+                            <span class="text-gray-700 truncate max-w-xs">{{ item.name }}</span>
+                            <span class="font-bold font-mono bg-blue-50 text-blue-800 px-2 py-0.5 rounded-sm">{{ item.qty }} rents</span>
+                        </div>
+                        {% else %}
+                        <p class="text-gray-400 italic text-[11px] py-2">No rental records.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Charts Layout Row 2 -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Bar Chart: Category Breakdowns -->
+            <div class="lg:col-span-8 border border-gray-100 rounded-sm bg-white p-6 shadow-sm">
+                <h3 class="text-xs uppercase tracking-widest font-bold text-matte mb-6 border-b border-gray-50 pb-3">Department Performance (Sales vs Rentals by Category)</h3>
+                <div class="h-80 relative">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Pie Chart: Revenue Distributions -->
+            <div class="lg:col-span-4 border border-gray-100 rounded-sm bg-white p-6 shadow-sm flex flex-col justify-between">
+                <div>
+                    <h3 class="text-xs uppercase tracking-widest font-bold text-matte mb-6 border-b border-gray-50 pb-3">Revenue Share</h3>
+                    <div class="h-64 relative">
+                        <canvas id="shareChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 1. Monthly Revenue (Line Chart)
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    const monthlyLabels = {{ metrics.monthly_chart.labels|tojson }};
+    const salesData = {{ metrics.monthly_chart.sales|tojson }};
+    const rentalsData = {{ metrics.monthly_chart.rentals|tojson }};
+    
+    new Chart(monthlyCtx, {
+        type: 'line',
+        data: {
+            labels: monthlyLabels,
+            datasets: [
+                {
+                    label: 'Purchase Sales ($)',
+                    data: salesData,
+                    borderColor: '#111111',
+                    backgroundColor: 'rgba(17, 17, 17, 0.03)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                },
+                {
+                    label: 'Rentals & Late Fees ($)',
+                    data: rentalsData,
+                    borderColor: '#F4B6C2',
+                    backgroundColor: 'rgba(244, 182, 194, 0.05)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 15, font: { family: 'Inter', size: 10 } }
+                }
+            },
+            scales: {
+                y: { grid: { color: '#F9F9F9' }, ticks: { font: { family: 'Inter', size: 10 } } },
+                x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10 } } }
+            }
+        }
+    });
+
+    // 2. Category Performance (Bar Chart)
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryLabels = {{ metrics.category_chart.labels|tojson }};
+    const catSales = {{ metrics.category_chart.sales|tojson }};
+    const catRentals = {{ metrics.category_chart.rentals|tojson }};
+    
+    new Chart(categoryCtx, {
+        type: 'bar',
+        data: {
+            labels: categoryLabels,
+            datasets: [
+                {
+                    label: 'Purchase Qty',
+                    data: catSales,
+                    backgroundColor: '#111111',
+                    borderRadius: 2
+                },
+                {
+                    label: 'Rental Count',
+                    data: catRentals,
+                    backgroundColor: '#F4B6C2',
+                    borderRadius: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 15, font: { family: 'Inter', size: 10 } }
+                }
+            },
+            scales: {
+                y: { grid: { color: '#F9F9F9' }, ticks: { font: { family: 'Inter', size: 10 } } },
+                x: { grid: { display: false }, ticks: { font: { family: 'Inter', size: 10 } } }
+            }
+        }
+    });
+
+    // 3. Share Chart (Doughnut Chart)
+    const shareCtx = document.getElementById('shareChart').getContext('2d');
+    const shareSales = parseFloat("{{ metrics.total_sales }}");
+    const shareRent = parseFloat("{{ metrics.total_rent }}");
+    
+    new Chart(shareCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Purchases', 'Rentals & Late Fees'],
+            datasets: [{
+                data: [shareSales, shareRent],
+                backgroundColor: ['#111111', '#F4B6C2'],
+                borderWidth: 1,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 15, font: { family: 'Inter', size: 10 } }
+                }
+            },
+            cutout: '65%'
+        }
+    });
+</script>
+{% endblock %}

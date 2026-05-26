@@ -1,0 +1,111 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Staff Management{% endblock %}
+
+{% block content %}
+<section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="flex justify-between items-baseline border-b border-gray-100 pb-6 mb-8">
+            <div>
+                <span class="text-xs uppercase tracking-widest text-softpink font-medium">Boutique Owner Control</span>
+                <h1 class="font-serif text-3xl font-light text-matte mt-1">Staff Management</h1>
+            </div>
+            
+            <div class="flex space-x-4 text-xs uppercase tracking-widest font-semibold">
+                <a href="{{ url_for('admin.dashboard') }}" class="hover:text-softpink transition">Analytics Overview</a>
+                <span class="text-gray-300">|</span>
+                <span class="text-softpink border-b border-softpink pb-1">Staff Management</span>
+            </div>
+        </div>
+        
+        <!-- Grid layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+            <!-- Left Side: Staff List -->
+            <div class="lg:col-span-8 bg-white border border-gray-100 rounded-sm shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-gray-100">
+                    <h3 class="text-xs uppercase tracking-widest font-bold text-matte">Registered Staff & Administrators</h3>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-100 text-[10px] uppercase tracking-widest text-gray-500 font-semibold">
+                                <th class="p-4">Name</th>
+                                <th class="p-4">Email</th>
+                                <th class="p-4">Role</th>
+                                <th class="p-4">Added Date</th>
+                                <th class="p-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for member in staff_members %}
+                            <tr class="hover:bg-gray-50/50 transition-colors duration-150">
+                                <td class="p-4 font-bold text-matte">{{ member.fullname }}</td>
+                                <td class="p-4 text-gray-600 font-mono">{{ member.email }}</td>
+                                <td class="p-4">
+                                    {% if member.role == 'admin' %}
+                                    <span class="bg-matte text-white text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-sm">Administrator</span>
+                                    {% else %}
+                                    <span class="bg-softpink text-matte text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-sm">Staff User</span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-4 text-gray-400 font-mono text-[10px]">{{ member.created_at.strftime('%Y-%m-%d') }}</td>
+                                <td class="p-4 text-right">
+                                    {% if member.id == current_user.id %}
+                                    <span class="text-gray-400 text-[10px] italic">You</span>
+                                    {% elif member.role == 'admin' %}
+                                    <span class="text-gray-400 text-[10px] italic">Protected</span>
+                                    {% else %}
+                                    <form action="{{ url_for('admin.delete_staff', user_id=member.id) }}" method="POST" class="inline" onsubmit="return confirm('Remove all access permissions for {{ member.fullname }}? This action is permanent.');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="text-xs uppercase tracking-widest text-red-500 hover:text-red-700 font-semibold transition">
+                                            Revoke Access
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="p-8 text-center text-gray-400">No staff registered. Use form to create accounts.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Right Side: Create Account Form -->
+            <div class="lg:col-span-4 bg-blush/20 border border-softpink/10 p-6 md:p-8 rounded-sm space-y-6">
+                <h3 class="text-xs uppercase tracking-widest font-bold text-matte border-b border-gray-100 pb-3">Create Staff Account</h3>
+                
+                <form action="{{ url_for('admin.staff') }}" method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Full Name</label>
+                        <input type="text" name="fullname" required placeholder="e.g. Jean Smith" class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white">
+                    </div>
+                    
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Email Address</label>
+                        <input type="email" name="email" required placeholder="e.g. jean@moora.com" class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white font-mono">
+                    </div>
+                    
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Security Password</label>
+                        <input type="password" name="password" required class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white">
+                    </div>
+                    
+                    <button type="submit" class="btn-luxury w-full py-3.5 text-xs font-semibold rounded-sm uppercase tracking-widest mt-2">
+                        Register Account
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+    </div>
+</section>
+{% endblock %}

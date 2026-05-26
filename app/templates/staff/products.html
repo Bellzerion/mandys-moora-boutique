@@ -1,0 +1,284 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Products Management{% endblock %}
+
+{% block content %}
+<section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Headers -->
+        <div class="flex justify-between items-center border-b border-gray-100 pb-6 mb-8">
+            <div>
+                <span class="text-xs uppercase tracking-widest text-softpink font-medium">Store Operations</span>
+                <h1 class="font-serif text-3xl font-light text-matte mt-1">Catalog Manager</h1>
+            </div>
+            
+            <div class="flex items-center space-x-6">
+                <div class="flex space-x-4 text-xs uppercase tracking-widest font-semibold">
+                    <span class="text-softpink border-b border-softpink pb-1">Products CRUD</span>
+                    <span class="text-gray-300">|</span>
+                    <a href="{{ url_for('staff.inventory') }}" class="hover:text-softpink transition">Inventory Logs</a>
+                    <span class="text-gray-300">|</span>
+                    <a href="{{ url_for('staff.orders') }}" class="hover:text-softpink transition">Purchase Orders</a>
+                    <span class="text-gray-300">|</span>
+                    <a href="{{ url_for('staff.rentals') }}" class="hover:text-softpink transition">Rentals board</a>
+                </div>
+                <button onclick="openModal('add-modal')" class="btn-luxury px-5 py-2.5 text-[10px] rounded-sm">
+                    Add Product
+                </button>
+            </div>
+        </div>
+        
+        <!-- Products Table -->
+        <div class="bg-white border border-gray-100 rounded-sm shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b border-gray-100 text-[10px] uppercase tracking-widest text-gray-500 font-semibold">
+                            <th class="p-4">Item details</th>
+                            <th class="p-4">Category</th>
+                            <th class="p-4">Purchase Price</th>
+                            <th class="p-4">Rental Price / Day</th>
+                            <th class="p-4">Stock</th>
+                            <th class="p-4">Size</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        {% for product in products %}
+                        <tr class="hover:bg-gray-50/50 transition-colors duration-150">
+                            <!-- Detail -->
+                            <td class="p-4">
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-10 h-12 bg-gray-50 overflow-hidden rounded-sm flex-shrink-0 border border-gray-100">
+                                        <img src="{{ product.image_url }}" alt="" class="w-full h-full object-cover">
+                                    </div>
+                                    <div class="space-y-0.5">
+                                        <div class="font-semibold text-matte text-xs">{{ product.name }}</div>
+                                        <div class="text-[10px] text-gray-400 max-w-xs truncate font-light">{{ product.description or 'No description' }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <!-- Category -->
+                            <td class="p-4 text-gray-700 uppercase tracking-widest text-[10px]">{{ product.category }}</td>
+                            <!-- Sell Price -->
+                            <td class="p-4 font-bold text-matte">${{ "%.2f"|format(product.price) }}</td>
+                            <!-- Rent Price -->
+                            <td class="p-4 font-bold text-softpink">${{ "%.2f"|format(product.rental_price) }}</td>
+                            <!-- Stock -->
+                            <td class="p-4 font-semibold text-gray-700">{{ product.stock }}</td>
+                            <!-- Size -->
+                            <td class="p-4 uppercase font-bold text-matte">{{ product.size }}</td>
+                            <!-- Status -->
+                            <td class="p-4">
+                                {% if product.status == 'Available' %}
+                                <span class="bg-green-50 text-green-800 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-sm">Available</span>
+                                {% elif product.status == 'Low Stock' %}
+                                <span class="bg-yellow-50 text-yellow-800 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-sm">Low Stock</span>
+                                {% else %}
+                                <span class="bg-red-50 text-red-800 text-[9px] uppercase tracking-widest font-bold px-2 py-0.5 rounded-sm">Out of stock</span>
+                                {% endif %}
+                            </td>
+                            <!-- Actions -->
+                            <td class="p-4 text-right space-x-2">
+                                <button onclick="openEditModal({{ product.id }}, '{{ product.name|escape }}', '{{ product.description|escape }}', '{{ product.category }}', {{ product.price }}, {{ product.rental_price }}, {{ product.stock }}, '{{ product.size }}')" class="text-xs uppercase tracking-widest hover:text-softpink font-semibold text-matte transition p-1">
+                                    Edit
+                                </button>
+                                <form action="{{ url_for('staff.delete_product', product_id=product.id) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this product? All logs relating to it will also be lost.');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="text-xs uppercase tracking-widest text-red-500 hover:text-red-700 font-semibold transition p-1">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="p-8 text-center text-gray-400">No products registered. Use Add Product to populate catalog.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Add Modal -->
+<div id="add-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Backdrop -->
+        <div onclick="closeModal('add-modal')" class="fixed inset-0 transition-opacity bg-matte/50 backdrop-blur-sm"></div>
+        
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        
+        <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-sm shadow-2xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100 p-8">
+            <h3 class="font-serif text-2xl font-light text-matte border-b border-gray-100 pb-3 mb-6 uppercase tracking-wide">Add New Product</h3>
+            
+            <form action="{{ url_for('staff.products') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                {{ form.hidden_tag() }}
+                
+                <div class="space-y-1">
+                    {{ form.name.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                    {{ form.name(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white") }}
+                </div>
+                
+                <div class="space-y-1">
+                    {{ form.description.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                    {{ form.description(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white", rows=3) }}
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        {{ form.category.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                        {{ form.category(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white") }}
+                    </div>
+                    <div class="space-y-1">
+                        {{ form.size.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                        {{ form.size(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white") }}
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="space-y-1">
+                        {{ form.price.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                        {{ form.price(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white") }}
+                    </div>
+                    <div class="space-y-1">
+                        {{ form.rental_price.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                        {{ form.rental_price(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white") }}
+                    </div>
+                    <div class="space-y-1">
+                        {{ form.stock.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                        {{ form.stock(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white") }}
+                    </div>
+                </div>
+                
+                <div class="space-y-1">
+                    {{ form.image.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                    {{ form.image(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white") }}
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeModal('add-modal')" class="text-xs uppercase tracking-widest text-gray-400 hover:text-matte font-semibold py-2">
+                        Cancel
+                    </button>
+                    {{ form.submit(class="btn-pink px-6 py-2.5 text-xs font-semibold rounded-sm cursor-pointer") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" class="fixed inset-0 z-50 overflow-y-auto hidden">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <!-- Backdrop -->
+        <div onclick="closeModal('edit-modal')" class="fixed inset-0 transition-opacity bg-matte/50 backdrop-blur-sm"></div>
+        
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
+        
+        <div class="inline-block overflow-hidden text-left align-bottom transition-all transform bg-white rounded-sm shadow-2xl sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-100 p-8">
+            <h3 class="font-serif text-2xl font-light text-matte border-b border-gray-100 pb-3 mb-6 uppercase tracking-wide">Edit Product</h3>
+            
+            <form id="edit-form" action="" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <div class="space-y-1">
+                    <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Product Name</label>
+                    <input type="text" name="name" id="edit-name" required class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white">
+                </div>
+                
+                <div class="space-y-1">
+                    <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Description</label>
+                    <textarea name="description" id="edit-description" rows="3" class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Category</label>
+                        <select name="category" id="edit-category" required class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white text-gray-700">
+                            <option value="Dresses">Dresses</option>
+                            <option value="Outerwear">Outerwear</option>
+                            <option value="Jumpsuits">Jumpsuits</option>
+                            <option value="Tops">Tops</option>
+                            <option value="Bottoms">Bottoms</option>
+                            <option value="Accessories">Accessories</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Size</label>
+                        <select name="size" id="edit-size" required class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white text-gray-700">
+                            <option value="XS">XS</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="One Size">One Size</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Purchase Price ($)</label>
+                        <input type="number" step="0.01" min="0" name="price" id="edit-price" required class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Rental Price / Day ($)</label>
+                        <input type="number" step="0.01" min="0" name="rental_price" id="edit-rental-price" required class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Stock</label>
+                        <input type="number" name="stock" id="edit-stock" required class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white">
+                    </div>
+                </div>
+                
+                <div class="space-y-1">
+                    <label class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block">Replace Image (Optional)</label>
+                    <input type="file" name="image" class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white">
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" onclick="closeModal('edit-modal')" class="text-xs uppercase tracking-widest text-gray-400 hover:text-matte font-semibold py-2">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-pink px-6 py-2.5 text-xs font-semibold rounded-sm uppercase tracking-widest">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openModal(id) {
+        document.getElementById(id).classList.remove('hidden');
+    }
+    
+    function closeModal(id) {
+        document.getElementById(id).classList.add('hidden');
+    }
+    
+    function openEditModal(id, name, desc, category, price, rentPrice, stock, size) {
+        // Set action URI
+        document.getElementById('edit-form').action = `/staff/products/edit/${id}`;
+        
+        // Populate inputs
+        document.getElementById('edit-name').value = name;
+        document.getElementById('edit-description').value = desc;
+        document.getElementById('edit-category').value = category;
+        document.getElementById('edit-size').value = size;
+        document.getElementById('edit-price').value = price.toFixed(2);
+        document.getElementById('edit-rental-price').value = rentPrice.toFixed(2);
+        document.getElementById('edit-stock').value = stock;
+        
+        // Open
+        openModal('edit-modal');
+    }
+</script>
+{% endblock %}

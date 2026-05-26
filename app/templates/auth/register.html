@@ -1,0 +1,61 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Create Account{% endblock %}
+
+{% block content %}
+<section class="py-20 flex items-center justify-center bg-white">
+    <div class="w-full max-w-md mx-4 p-8 border border-gray-100 rounded-sm shadow-sm space-y-8 bg-white">
+        <div class="text-center space-y-2">
+            <span class="text-xs uppercase tracking-widest text-softpink font-semibold">Join The Boutique</span>
+            <h1 class="font-serif text-3xl font-light text-matte">Create Account</h1>
+        </div>
+        
+        <form method="POST" class="space-y-5">
+            {{ form.hidden_tag() }}
+            
+            <div class="space-y-1">
+                {{ form.fullname.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                {{ form.fullname(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white") }}
+                {% if form.fullname.errors %}
+                <p class="text-[10px] text-red-500 mt-1 uppercase font-semibold">{{ form.fullname.errors[0] }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="space-y-1">
+                {{ form.email.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                {{ form.email(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white") }}
+                {% if form.email.errors %}
+                <p class="text-[10px] text-red-500 mt-1 uppercase font-semibold">{{ form.email.errors[0] }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="space-y-1">
+                {{ form.password.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                {{ form.password(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white") }}
+                {% if form.password.errors %}
+                <p class="text-[10px] text-red-500 mt-1 uppercase font-semibold">{{ form.password.errors[0] }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="space-y-1">
+                {{ form.confirm_password.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                {{ form.confirm_password(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white") }}
+                {% if form.confirm_password.errors %}
+                <p class="text-[10px] text-red-500 mt-1 uppercase font-semibold">{{ form.confirm_password.errors[0] }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="text-[10px] text-gray-400 font-light leading-relaxed">
+                By creating an account, you agree to our <a href="#" class="underline hover:text-matte">Terms of Service</a> and <a href="#" class="underline hover:text-matte">Privacy Policy</a>.
+            </div>
+            
+            {{ form.submit(class="btn-pink w-full py-4 text-xs font-semibold rounded-sm cursor-pointer") }}
+        </form>
+        
+        <div class="text-center text-xs text-gray-400">
+            Already have an account? 
+            <a href="{{ url_for('auth.login') }}" class="text-matte hover:text-softpink font-bold transition ml-1">Sign In</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

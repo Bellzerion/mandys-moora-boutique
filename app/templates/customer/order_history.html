@@ -1,0 +1,171 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Order & Rental History{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="border-b border-gray-100 pb-6 mb-10">
+            <h1 class="font-serif text-3xl font-light tracking-wide text-matte">Your History</h1>
+            <p class="text-xs text-gray-400 mt-2 font-light">TRACK YOUR FASHION PURCHASES AND DRESS RENTAL STATUSES</p>
+        </div>
+        
+        <!-- Toggle Tabs -->
+        <div class="flex border-b border-gray-100 mb-8" id="tabs">
+            <button onclick="switchTab('orders')" id="tab-orders-btn" class="pb-3 text-xs uppercase tracking-widest font-semibold border-b-2 border-matte mr-8 transition">
+                Purchase Orders ({{ orders|length }})
+            </button>
+            <button onclick="switchTab('rentals')" id="tab-rentals-btn" class="pb-3 text-xs uppercase tracking-widest font-semibold border-b-2 border-transparent text-gray-400 hover:text-matte transition">
+                Rentals Program ({{ rentals|length }})
+            </button>
+        </div>
+        
+        <!-- Orders Tab Content -->
+        <div id="tab-orders" class="space-y-6">
+            {% for order in orders %}
+            <div class="border border-gray-100 rounded-sm p-6 bg-white space-y-4 shadow-sm">
+                <!-- Header of Order -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs uppercase tracking-wider font-light pb-4 border-b border-gray-50 space-y-2 sm:space-y-0">
+                    <div class="space-x-4">
+                        <span class="font-semibold text-matte">Order #{{ order.id }}</span>
+                        <span class="text-gray-400">•</span>
+                        <span>Placed on: {{ order.created_at.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-gray-400">Total:</span>
+                        <span class="font-semibold text-matte">${{ "%.2f"|format(order.total_amount) }}</span>
+                        <span class="text-gray-400">•</span>
+                        <!-- Status Pills -->
+                        {% if order.order_status == 'Pending' %}
+                        <span class="bg-gray-100 text-gray-600 text-[9px] font-bold px-2.5 py-1 rounded-full">{{ order.order_status }}</span>
+                        {% elif order.order_status in ['Processing', 'Shipped'] %}
+                        <span class="bg-yellow-50 text-yellow-800 text-[9px] font-bold px-2.5 py-1 rounded-full">{{ order.order_status }}</span>
+                        {% else %}
+                        <span class="bg-green-50 text-green-800 text-[9px] font-bold px-2.5 py-1 rounded-full">{{ order.order_status }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Order Items list -->
+                <div class="divide-y divide-gray-50">
+                    {% for item in order.items %}
+                    <div class="py-3 flex justify-between items-center text-xs">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-16 bg-gray-50 overflow-hidden rounded-sm flex-shrink-0 border">
+                                <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="w-full h-full object-cover">
+                            </div>
+                            <div class="space-y-0.5">
+                                <h4 class="font-medium text-matte">{{ item.product.name }}</h4>
+                                <p class="text-[10px] text-gray-400 uppercase tracking-widest">Size {{ item.product.size }} • Qty x{{ item.quantity }}</p>
+                            </div>
+                        </div>
+                        <span class="font-semibold text-gray-700">${{ "%.2f"|format(item.subtotal) }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-16 bg-gray-50 rounded-sm">
+                <i class="fa-solid fa-receipt text-2xl text-gray-300 mb-3"></i>
+                <h3 class="text-xs uppercase tracking-widest text-gray-500 font-bold">No purchase orders found</h3>
+                <p class="text-xs text-gray-400 mt-1 font-light">You haven't purchased any items yet.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Rentals Tab Content -->
+        <div id="tab-rentals" class="space-y-6 hidden">
+            {% for rental in rentals %}
+            <div class="border border-gray-100 rounded-sm p-6 bg-white space-y-4 shadow-sm">
+                <!-- Header of Rental -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs uppercase tracking-wider font-light pb-4 border-b border-gray-50 space-y-2 sm:space-y-0">
+                    <div class="space-x-4">
+                        <span class="font-semibold text-matte">Rental ID #{{ rental.id }}</span>
+                        <span class="text-gray-400">•</span>
+                        <span>Rent Date: {{ rental.rent_date.strftime('%b %d, %Y') }}</span>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="text-gray-400">Expected Return:</span>
+                        <span class="font-semibold text-matte">{{ rental.expected_return_date.strftime('%b %d, %Y') }}</span>
+                        <span class="text-gray-400">•</span>
+                        
+                        <!-- Status Pills -->
+                        {% if rental.rental_status == 'Pending' %}
+                        <span class="bg-gray-100 text-gray-600 text-[9px] font-bold px-2.5 py-1 rounded-full">Pending Pickup</span>
+                        {% elif rental.rental_status == 'Active' %}
+                        <span class="bg-blue-50 text-blue-800 text-[9px] font-bold px-2.5 py-1 rounded-full">Active</span>
+                        {% elif rental.rental_status == 'Returned' %}
+                        <span class="bg-green-50 text-green-800 text-[9px] font-bold px-2.5 py-1 rounded-full">Returned</span>
+                        {% else %}
+                        <span class="bg-red-50 text-red-800 text-[9px] font-bold px-2.5 py-1 rounded-full">LATE / DUE</span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Rental Item description -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs space-y-4 sm:space-y-0">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-16 bg-gray-50 overflow-hidden rounded-sm flex-shrink-0 border">
+                            <img src="{{ rental.product.image_url }}" alt="{{ rental.product.name }}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="space-y-0.5">
+                            <h4 class="font-medium text-matte">{{ rental.product.name }}</h4>
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest">Size {{ rental.product.size }} • {{ rental.rental_days }} Days Rental</p>
+                        </div>
+                    </div>
+                    
+                    <div class="text-left sm:text-right space-y-1">
+                        <div class="flex items-baseline space-x-2 justify-start sm:justify-end">
+                            <span class="text-[10px] text-gray-400 uppercase tracking-widest">Base Fee:</span>
+                            <span class="font-bold text-matte">${{ "%.2f"|format(rental.rental_fee) }}</span>
+                        </div>
+                        
+                        {% if rental.late_fee > 0 %}
+                        <div class="flex items-baseline space-x-2 justify-start sm:justify-end text-red-600">
+                            <span class="text-[10px] uppercase tracking-widest">Late Return Penalty:</span>
+                            <span class="font-bold">${{ "%.2f"|format(rental.late_fee) }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if rental.return_date %}
+                        <p class="text-[10px] text-gray-400 uppercase tracking-widest">Returned: {{ rental.return_date.strftime('%b %d, %Y') }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-16 bg-gray-50 rounded-sm">
+                <i class="fa-solid fa-clock-rotate-left text-2xl text-gray-300 mb-3"></i>
+                <h3 class="text-xs uppercase tracking-widest text-gray-500 font-bold">No active rentals found</h3>
+                <p class="text-xs text-gray-400 mt-1 font-light">Join the rentals program by selecting dress items to rent.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function switchTab(tab) {
+        const ordersTab = document.getElementById('tab-orders');
+        const rentalsTab = document.getElementById('tab-rentals');
+        const ordersBtn = document.getElementById('tab-orders-btn');
+        const rentalsBtn = document.getElementById('tab-rentals-btn');
+        
+        if (tab === 'orders') {
+            ordersTab.classList.remove('hidden');
+            rentalsTab.classList.add('hidden');
+            ordersBtn.className = "pb-3 text-xs uppercase tracking-widest font-semibold border-b-2 border-matte mr-8 transition";
+            rentalsBtn.className = "pb-3 text-xs uppercase tracking-widest font-semibold border-b-2 border-transparent text-gray-400 hover:text-matte transition";
+        } else {
+            ordersTab.classList.add('hidden');
+            rentalsTab.classList.remove('hidden');
+            ordersBtn.className = "pb-3 text-xs uppercase tracking-widest font-semibold border-b-2 border-transparent text-gray-400 hover:text-matte transition mr-8";
+            rentalsBtn.className = "pb-3 text-xs uppercase tracking-widest font-semibold border-b-2 border-matte transition";
+        }
+    }
+</script>
+{% endblock %}

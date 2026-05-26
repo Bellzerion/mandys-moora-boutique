@@ -1,0 +1,49 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}Sign In{% endblock %}
+
+{% block content %}
+<section class="py-20 flex items-center justify-center bg-white">
+    <div class="w-full max-w-md mx-4 p-8 border border-gray-100 rounded-sm shadow-sm space-y-8 bg-white">
+        <div class="text-center space-y-2">
+            <span class="text-xs uppercase tracking-widest text-softpink font-semibold">Welcome Back</span>
+            <h1 class="font-serif text-3xl font-light text-matte">Sign In</h1>
+        </div>
+        
+        <form method="POST" class="space-y-6">
+            {{ form.hidden_tag() }}
+            
+            <div class="space-y-1">
+                {{ form.email.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                {{ form.email(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white") }}
+                {% if form.email.errors %}
+                <p class="text-[10px] text-red-500 mt-1 uppercase font-semibold">{{ form.email.errors[0] }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="space-y-1">
+                {{ form.password.label(class="text-[10px] uppercase tracking-widest text-gray-400 font-semibold block") }}
+                {{ form.password(class="w-full border border-gray-200 text-xs px-4 py-2.5 rounded-sm focus:outline-none focus:border-matte bg-white") }}
+                {% if form.password.errors %}
+                <p class="text-[10px] text-red-500 mt-1 uppercase font-semibold">{{ form.password.errors[0] }}</p>
+                {% endif %}
+            </div>
+            
+            <div class="flex items-center justify-between text-xs">
+                <label class="flex items-center space-x-2 text-gray-500 cursor-pointer">
+                    {{ form.remember(class="rounded-sm text-matte focus:ring-matte border-gray-200 w-4 h-4") }}
+                    <span>Keep me signed in</span>
+                </label>
+                <a href="#" class="text-gray-400 hover:text-matte transition underline">Forgot password?</a>
+            </div>
+            
+            {{ form.submit(class="btn-luxury w-full py-4 text-xs font-semibold rounded-sm cursor-pointer") }}
+        </form>
+        
+        <div class="text-center text-xs text-gray-400">
+            Don't have an account? 
+            <a href="{{ url_for('auth.register') }}" class="text-matte hover:text-softpink font-bold transition ml-1">Create Account</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

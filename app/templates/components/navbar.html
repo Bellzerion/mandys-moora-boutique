@@ -1,0 +1,71 @@
+<nav class="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-20">
+            <!-- Brand Logo -->
+            <div class="flex items-center">
+                <a href="{{ url_for('main.home') }}" class="font-serif text-2xl font-semibold tracking-widest text-matte uppercase transition hover:opacity-80">
+                    Mandy’s Moora
+                </a>
+            </div>
+            
+            <!-- Mid Navigation Links -->
+            <div class="hidden md:flex space-x-10 items-center">
+                <a href="{{ url_for('main.shop') }}" class="text-xs uppercase tracking-widest text-matte/80 hover:text-softpink transition-colors duration-300">Shop</a>
+                <a href="{{ url_for('main.about') }}" class="text-xs uppercase tracking-widest text-matte/80 hover:text-softpink transition-colors duration-300">About</a>
+                <a href="{{ url_for('main.contact') }}" class="text-xs uppercase tracking-widest text-matte/80 hover:text-softpink transition-colors duration-300">Contact</a>
+            </div>
+            
+            <!-- Right Navigation Utilities -->
+            <div class="flex items-center space-x-6">
+                <!-- Cart Icon -->
+                <a href="{{ url_for('customer.view_cart') }}" class="relative text-matte hover:text-softpink transition-colors duration-300 p-2">
+                    <i class="fa-solid fa-bag-shopping text-lg"></i>
+                    {% if cart_count > 0 %}
+                    <span class="absolute -top-0.5 -right-0.5 bg-matte text-white text-[9px] font-bold w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white">
+                        {{ cart_count }}
+                    </span>
+                    {% endif %}
+                </a>
+                
+                <!-- User Account Dropdown -->
+                {% if current_user.is_authenticated %}
+                <div class="relative group">
+                    <button class="flex items-center space-x-1.5 text-xs uppercase tracking-widest text-matte/80 hover:text-softpink focus:outline-none py-2 font-medium">
+                        <span>{{ current_user.fullname.split(' ')[0] }}</span>
+                        <i class="fa-solid fa-chevron-down text-[8px] mt-0.5"></i>
+                    </button>
+                    <!-- Dropdown List -->
+                    <div class="absolute right-0 w-48 bg-white border border-gray-100 shadow-xl rounded-sm py-2 mt-0 z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-1 group-hover:translate-y-0">
+                        {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="block px-4 py-2 text-[10px] uppercase tracking-widest hover:bg-blush hover:text-matte transition text-gray-700 font-semibold border-b border-gray-100">
+                            <i class="fa-solid fa-chart-line mr-2"></i> Admin Panel
+                        </a>
+                        {% elif current_user.role == 'staff' %}
+                        <a href="{{ url_for('staff.products') }}" class="block px-4 py-2 text-[10px] uppercase tracking-widest hover:bg-blush hover:text-matte transition text-gray-700 font-semibold border-b border-gray-100">
+                            <i class="fa-solid fa-tags mr-2"></i> Staff Portal
+                        </a>
+                        {% endif %}
+                        
+                        <a href="{{ url_for('customer.profile') }}" class="block px-4 py-2 text-xs text-gray-600 hover:bg-blush hover:text-matte transition-colors duration-300">
+                            <i class="fa-regular fa-user mr-2 text-gray-400"></i> Profile
+                        </a>
+                        <a href="{{ url_for('customer.order_history') }}" class="block px-4 py-2 text-xs text-gray-600 hover:bg-blush hover:text-matte transition-colors duration-300">
+                            <i class="fa-solid fa-clock-rotate-left mr-2 text-gray-400"></i> Order History
+                        </a>
+                        <a href="{{ url_for('auth.logout') }}" class="block px-4 py-2 text-xs text-red-500 hover:bg-red-50 transition border-t border-gray-50">
+                            <i class="fa-solid fa-arrow-right-from-bracket mr-2 text-red-400"></i> Sign Out
+                        </a>
+                    </div>
+                </div>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}" class="text-xs uppercase tracking-widest text-matte/80 hover:text-softpink font-medium transition-colors duration-300">
+                    Sign In
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="hidden sm:inline-block btn-luxury px-4 py-2 text-[10px]">
+                    Join Now
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
