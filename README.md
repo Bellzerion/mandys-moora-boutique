@@ -11,9 +11,10 @@ A premium web-based fashion boutique platform offering e-commerce, clothing rent
 
 ## Tech Stack
 
-* **Backend**: Python, Flask, SQLAlchemy
+* **Backend**: Python, Flask
+* **ORM**: SQLAlchemy for database interactions
 * **Frontend**: HTML/Jinja2, Tailwind CSS, Vanilla JS, Chart.js
-* **Database**: SQLite (Development)
+* **Database**: MySQL via XAMPP (Development) (SQLite optional for quick tests)
 
 ## Local Setup Instructions
 
@@ -43,7 +44,7 @@ A premium web-based fashion boutique platform offering e-commerce, clothing rent
    FLASK_APP=run.py
    FLASK_ENV=development
    SECRET_KEY=your-super-secret-key
-   DATABASE_URL=sqlite:///site.db
+   DATABASE_URL=mysql+pymysql://username:password@localhost/mandys_moora_db
    ```
 
 6. **Initialize the database and seed data**

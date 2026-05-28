@@ -31,6 +31,7 @@
                         <span class="font-semibold text-matte">Order #{{ order.id }}</span>
                         <span class="text-gray-400">•</span>
                         <span>Placed on: {{ order.created_at.strftime('%b %d, %Y') }}</span>
+                        <a href="{{ url_for('customer.download_invoice', order_id=order.id) }}" class="ml-4 text-[10px] font-bold text-softpink hover:text-matte transition uppercase tracking-widest"><i class="fa-solid fa-file-pdf mr-1"></i> Invoice</a>
                     </div>
                     <div class="flex items-center space-x-3">
                         <span class="text-gray-400">Total:</span>

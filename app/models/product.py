@@ -20,6 +20,14 @@ class Product(db.Model):
     order_items = db.relationship('OrderItem', backref='product', lazy=True)
     rentals = db.relationship('Rental', backref='product', lazy=True)
     inventory_logs = db.relationship('InventoryLog', backref='product', lazy=True, cascade='all, delete-orphan')
+    reviews = db.relationship('Review', backref='product', lazy=True, cascade='all, delete-orphan')
+
+    @property
+    def average_rating(self):
+        if not self.reviews:
+            return 0.0
+        total = sum([review.rating for review in self.reviews])
+        return round(total / len(self.reviews), 1)
 
     def update_status(self):
         if self.stock <= 0:

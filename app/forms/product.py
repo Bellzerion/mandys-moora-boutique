@@ -29,3 +29,14 @@ class ProductForm(FlaskForm):
         FileAllowed(['jpg', 'png', 'jpeg', 'webp', 'gif'], 'Images only!')
     ])
     submit = SubmitField('Save Product')
+
+class ReviewForm(FlaskForm):
+    rating = SelectField('Rating', choices=[
+        ('5', '★★★★★ (5/5)'),
+        ('4', '★★★★☆ (4/5)'),
+        ('3', '★★★☆☆ (3/5)'),
+        ('2', '★★☆☆☆ (2/5)'),
+        ('1', '★☆☆☆☆ (1/5)')
+    ], validators=[DataRequired()])
+    comment = TextAreaField('Review (Optional)', validators=[Length(max=500)])
+    submit = SubmitField('Submit Review')

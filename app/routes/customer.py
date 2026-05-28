@@ -1,7 +1,10 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, session
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session, send_file
 from flask_login import login_required, current_user
 from datetime import datetime
+import io
+from fpdf import FPDF
 from app.extensions import db
+from app.models.user import User
 from app.models.product import Product
 from app.models.order import Order, OrderItem
 from app.models.rental import Rental
@@ -249,6 +252,69 @@ def order_history():
         r.update_late_status()
         
     return render_template('customer/order_history.html', orders=orders, rentals=rentals)
+
+@customer_bp.route('/order/<int:order_id>/invoice')
+@login_required
+def download_invoice(order_id):
+    order = Order.query.get_or_404(order_id)
+    if order.user_id != current_user.id:
+        flash('Unauthorized.', 'danger')
+        return redirect(url_for('customer.order_history'))
+        
+    class PDF(FPDF):
+        def header(self):
+            self.set_font('helvetica', 'B', 20)
+            self.cell(0, 10, "Mandy's Moora Boutique", ln=True, align='C')
+            self.set_font('helvetica', 'I', 10)
+            self.cell(0, 10, 'Luxury Fashion & Rentals', ln=True, align='C')
+            self.ln(10)
+            
+        def footer(self):
+            self.set_y(-15)
+            self.set_font('helvetica', 'I', 8)
+            self.cell(0, 10, f'Page {self.page_no()}', align='C')
+
+    pdf = PDF()
+    pdf.add_page()
+    
+    # Invoice Details
+    pdf.set_font('helvetica', 'B', 12)
+    pdf.cell(0, 10, f'INVOICE #{order.id}', ln=True)
+    pdf.set_font('helvetica', '', 10)
+    pdf.cell(0, 8, f'Date: {order.created_at.strftime("%Y-%m-%d %H:%M")}', ln=True)
+    pdf.cell(0, 8, f'Customer: {current_user.fullname} ({current_user.email})', ln=True)
+    pdf.cell(0, 8, f'Status: {order.order_status}', ln=True)
+    pdf.cell(0, 8, f'Payment Method: {order.payment_method}', ln=True)
+    pdf.ln(10)
+    
+    # Table Header
+    pdf.set_font('helvetica', 'B', 10)
+    pdf.cell(100, 10, 'Item', border=1)
+    pdf.cell(30, 10, 'Qty', border=1, align='C')
+    pdf.cell(60, 10, 'Subtotal', border=1, align='R')
+    pdf.ln(10)
+    
+    # Items
+    pdf.set_font('helvetica', '', 10)
+    for item in order.items:
+        pdf.cell(100, 10, item.product.name, border=1)
+        pdf.cell(30, 10, str(item.quantity), border=1, align='C')
+        pdf.cell(60, 10, f'${float(item.subtotal):,.2f}', border=1, align='R')
+        pdf.ln(10)
+        
+    # Total
+    pdf.set_font('helvetica', 'B', 12)
+    pdf.cell(130, 10, 'Total:', border=1, align='R')
+    pdf.cell(60, 10, f'${float(order.total_amount):,.2f}', border=1, align='R')
+    
+    # Return PDF
+    pdf_bytes = pdf.output()
+    return send_file(
+        io.BytesIO(pdf_bytes),
+        as_attachment=True,
+        download_name=f'invoice_{order.id}.pdf',
+        mimetype='application/pdf'
+    )
 
 @customer_bp.route('/profile', methods=['GET', 'POST'])
 @login_required

@@ -13,6 +13,7 @@ from app.models.rental import Rental
 from app.models.inventory_log import InventoryLog
 from app.forms.product import ProductForm
 from app.routes.decorators import role_required
+from sqlalchemy.exc import IntegrityError
 
 staff_bp = Blueprint('staff', __name__)
 
@@ -156,10 +157,14 @@ def delete_product(product_id):
     
     # Delete product logs, then the product itself
     # SQLAlchemy handles delete-orphan for logs
-    db.session.delete(prod)
-    db.session.commit()
-    
-    flash(f'Product "{name}" deleted.', 'info')
+    try:
+        db.session.delete(prod)
+        db.session.commit()
+        flash(f'Product "{name}" deleted.', 'info')
+    except IntegrityError:
+        db.session.rollback()
+        flash(f'Cannot delete "{name}" because it is part of historical purchase orders or rentals. To hide it, please change its stock to 0.', 'danger')
+        
     return redirect(url_for('staff.products'))
 
 @staff_bp.route('/inventory')

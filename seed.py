@@ -7,6 +7,7 @@ from app.models.product import Product
 from app.models.order import Order, OrderItem
 from app.models.rental import Rental
 from app.models.inventory_log import InventoryLog
+from app.models.review import Review
 
 def seed_db():
     app = create_app()
