@@ -46,19 +46,22 @@ A premium web-based fashion boutique platform offering e-commerce, clothing rent
    SECRET_KEY=your-super-secret-key
    DATABASE_URL=mysql+pymysql://username:password@localhost/mandys_moora_db
    ```
+6. **Set up the MySQL database**
+   * Open XAMPP and start the MySQL service.
+   * Use phpMyAdmin to create a new database named `mandys_moora_db`.
 
-6. **Initialize the database and seed data**
+7. **Initialize the database and seed data**
    ```bash
    python seed.py
    ```
    *(This will create the database and populate it with sample products, users, and mock sales data).*
 
-7. **Run the application**
+8. **Run the application**
    ```bash
    flask run
    ```
 
-8. **Access the application**
+9. **Access the application**
    Open your browser and navigate to `http://127.0.0.1:5000`
 
 ## Demo Accounts
